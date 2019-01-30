@@ -4,6 +4,7 @@
 config.yaml
 ids.yaml
 .idea/
+sandbox/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
