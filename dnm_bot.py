@@ -32,14 +32,14 @@ class DnmBotClient(discord.Client):
         print(self.user.id)
         print('-------')
         
-    def daily_update(self):
+    async def daily_update(self):
         """
         Update today's event information from event table.
         """
         tz_jpn = pytz.timezone('Asia/Tokyo')
         dt_now = datetime.now(tz_jpn)
         weekday = dt_now.weekday()
-        self.events_today.clear()
+        # self.events_today.clear()
         self.events_today = self.days[self.days_replace[weekday]]
         print('events_today updated')
         print(self.events_today)
@@ -48,7 +48,7 @@ class DnmBotClient(discord.Client):
     
     async def start_bg_tasks(self):
         await self.wait_until_ready()
-        self.daily_update()
+        await self.daily_update()
         await self.bg_loop()
         
     async def update_server_and_channel_info(self):
@@ -114,7 +114,7 @@ class DnmBotClient(discord.Client):
             dt_event_update = tz_jpn.localize(dt_event_update, is_dst=False)
             dif_event_update = dt_event_update - dt_now
             if dif_event_update < timedelta(seconds=self.RUN_CYCLE) and dif_event_update >= timedelta():
-                self.daily_update()
+                await self.daily_update()
             
             # daily announce
             dt_daily_announce = datetime.combine(dt_now, self.daily_announce_time)
