@@ -6,13 +6,12 @@ import asyncio
 from datetime import datetime, date, time, timedelta
 import pytz
 
-
 class DnmBotClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.RUN_CYCLE = 60 # todo ->60
         self.ALARM_OFFSET = 15 # minutes
-        self.__DISCORD_TOKEN = kwargs['tokens']['discord_bot']
+        # self.__DISCORD_TOKEN = kwargs['tokens']['discord_bot']
         self.events = kwargs['events']
         self.days = kwargs['days']
         
@@ -43,8 +42,6 @@ class DnmBotClient(discord.Client):
         self.events_today = self.days[self.days_replace[weekday]]
         print('events_today updated')
         print(self.events_today)
-        
-        
     
     async def start_bg_tasks(self):
         await self.wait_until_ready()
@@ -172,16 +169,18 @@ class DnmBotClient(discord.Client):
         dt_event = tz.localize(dt_event, is_dst=False)
         return dt_event
         
-        
-    
+
     async def on_message(self, message):
         if message.content.startswith('/foo'):
             reply = 'bar'
             await self.send_message(message.channel, reply)
+            
 
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
         config = yaml.safe_load(f)
     client = DnmBotClient(**config)
-    client.run(config['tokens']['discord_bot'])
+    with open('./tokens.yaml', 'r') as f:
+        token = yaml.safe_load(f) # Use your own bot token.
+    client.run(token['tokens']['discord_bot'])
 

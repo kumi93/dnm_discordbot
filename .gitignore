@@ -1,8 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 
 # private files
-config.yaml
-ids.yaml
+tokens.yaml
 .idea/
 sandbox/
 
