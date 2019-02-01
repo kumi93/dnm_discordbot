@@ -175,7 +175,15 @@ class DnmBotClient(discord.Client):
         if message.content.startswith('/foo'):
             reply = 'bar'
             await self.send_message(message.channel, reply)
+
+        if message.content.startswith('なんやて'):
+            reply = '工藤！'
+            await self.send_message(message.channel, reply)
             
+        if message.content.startswith('もろたで'):
+            reply = '工藤！'
+            await self.send_message(message.channel, reply)
+
 
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
