@@ -5,6 +5,7 @@ import yaml
 import asyncio
 from datetime import datetime, date, time, timedelta
 import pytz
+import os
 
 class DnmBotClient(discord.Client):
     def __init__(self, *args, **kwargs):
@@ -180,7 +181,6 @@ if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
         config = yaml.safe_load(f)
     client = DnmBotClient(**config)
-    with open('./tokens.yaml', 'r') as f:
-        token = yaml.safe_load(f) # Use your own bot token.
-    client.run(token['tokens']['discord_bot'])
+    TOKEN = os.environ['BOT_TOKEN'] # Use your own token.
+    client.run(TOKEN)
 
