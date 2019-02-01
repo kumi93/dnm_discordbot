@@ -108,6 +108,7 @@ class DnmBotClient(discord.Client):
             dt_now = datetime.now(tz_jpn)
             print('###############')
             print(dt_now)
+            print('###############')
 
             # event update
             dt_event_update = datetime.combine(dt_now, time(5, 0, 0, 0))
@@ -147,7 +148,7 @@ class DnmBotClient(discord.Client):
             for event in self.events_today:
                 dt_event = self.get_event_datetime(event_name=event)
                 if dt_event is None:
-                    msg = msg + '       ' +  self.events[event]['name'] + '\n'
+                    msg = msg + self.events[event]['name'] + '\n'
                 else:
                     msg = msg + dt_event.strftime('%H:%M~') + ' ' + self.events[event]['name'] +'\n'
             await self.send_message(ch, msg)
@@ -157,7 +158,7 @@ class DnmBotClient(discord.Client):
         send event alarm message to the 'event-alarm' channel
         """
         for ch in self.event_channels:
-            msg = self.events[event_name]['name'] + ' 開始１５分前です\n'
+            msg = self.events[event_name]['name'] + ' 開始' + str(self.ALARM_OFFSET) + '分前です\n'
             await self.send_message(ch, msg)
     
     def get_event_datetime(self, event_name):
