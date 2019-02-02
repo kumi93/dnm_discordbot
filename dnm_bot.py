@@ -120,6 +120,7 @@ class DnmBotClient(discord.Client):
             dt_daily_announce = tz_jpn.localize(dt_daily_announce, is_dst=False)
             dif_daily_announce = dt_daily_announce - dt_now
             if dif_daily_announce < timedelta(seconds=self.RUN_CYCLE) and dif_daily_announce >= timedelta():
+                await self.daily_update()
                 await self.send_daily_announcement()
             
             # event alarm
@@ -139,7 +140,7 @@ class DnmBotClient(discord.Client):
             print(f'All operations in this loop ended at {dt_now}')
             await asyncio.sleep(self.RUN_CYCLE)
             dt_now = datetime.now(tz_jpn)
-            print(f'The loop ended at{dt_now}')
+            print(f'The loop ended at {dt_now}')
             
     async def send_daily_announcement(self):
         """
