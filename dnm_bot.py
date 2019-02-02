@@ -135,7 +135,11 @@ class DnmBotClient(discord.Client):
                 
             
             # sleep
+            dt_now = datetime.now(tz_jpn)
+            print(f'All operations in this loop ended at {dt_now}')
             await asyncio.sleep(self.RUN_CYCLE)
+            dt_now = datetime.now(tz_jpn)
+            print(f'The loop ended at{dt_now}')
             
     async def send_daily_announcement(self):
         """
