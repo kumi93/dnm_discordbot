@@ -25,6 +25,8 @@ class DnmBotClient(discord.Client):
         
         self.days_replace = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         self.bg_task = self.loop.create_task(self.start_bg_tasks())
+        
+        self.conan = ['なんやて', 'もろたで', 'せやかて', 'いけるで', 'なんやと', 'せやけど', 'せやろか', 'あかんて']
     
     async def on_ready(self):
         print('logged in as')
@@ -132,8 +134,6 @@ class DnmBotClient(discord.Client):
                 dif_event = dt_event - dt_now
                 if dif_event < timedelta(seconds=self.RUN_CYCLE) and dif_event >= timedelta():
                     await self.send_event_alarm(event)
-                
-                
             
             # sleep
             dt_now = datetime.now(tz_jpn)
@@ -175,21 +175,17 @@ class DnmBotClient(discord.Client):
         dt_event = tz.localize(dt_event, is_dst=False)
         return dt_event
         
-
+        
     async def on_message(self, message):
         if message.content.startswith('/foo'):
             reply = 'bar'
             await self.send_message(message.channel, reply)
 
-        if message.content.startswith('なんやて'):
-            reply = '工藤！'
-            await self.send_message(message.channel, reply)
-            
-        if message.content.startswith('もろたで'):
-            reply = '工藤！'
-            await self.send_message(message.channel, reply)
-
-
+        for word in self.conan:
+            if message.content.startswith(word):
+                reply = '工藤！'
+                await self.send_message(message.channel, reply)
+         
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
         config = yaml.safe_load(f)
