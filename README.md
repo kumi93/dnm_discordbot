@@ -1,12 +1,20 @@
 # dnm_discordbot
+
 ## 概要
 ドラゴンネストMのイベントを通知してくれるDiscord Bot
+
 ## やってくれること
-- 今日のイベント時間のお知らせ  
+- 今日のイベント時間のお知らせ
+  
 <img src="https://raw.github.com/wiki/kumi93/dnm_discordbot/images/daily_sample.png" width="350">
-- イベント直前に通知  
+
+- イベント直前に通知
+    
 <img src="https://raw.github.com/wiki/kumi93/dnm_discordbot/images/alarm_sample.png" width="350">
-## サンプルサーバー
+
+### サンプルサーバー
 実際にbotが動いているサーバー  
 https://discord.gg/yjMDVt7
+    
+実際の運用としては[herokuブランチ](https://github.com/kumi93/dnm_discordbot/tree/heroku)の内容をHerokuにデプロイしています
 
