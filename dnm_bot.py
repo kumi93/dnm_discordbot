@@ -148,7 +148,11 @@ class DnmBotClient(discord.Client):
                     msg = msg + self.events[event]['name'] + '\n'
                 else:
                     msg = msg + dt_event.strftime('%H:%M~') + ' ' + self.events[event]['name'] +'\n'
-            await self.send_message(ch, msg)
+            try:
+                await self.send_message(ch, msg)
+            except discord.Forbidden:
+                print(f'You need to grant permission to send message to {ch.name} on {ch.server.name}')
+                pass
         
     async def send_event_alarm(self, event_name):
         """
@@ -156,7 +160,12 @@ class DnmBotClient(discord.Client):
         """
         for ch in self.event_channels:
             msg = self.events[event_name]['name'] + ' 開始' + str(self.ALARM_OFFSET) + '分前です\n'
-            await self.send_message(ch, msg)
+            try:
+                await self.send_message(ch, msg)
+            except discord.Forbidden:
+                print(f'You need to grant permission to send message to {ch.name} on {ch.server.name}')
+                pass
+            
     
     def get_event_datetime(self, event_name):
         tz = pytz.timezone('Asia/Tokyo')
@@ -174,6 +183,11 @@ class DnmBotClient(discord.Client):
         if message.content.startswith('/foo'):
             reply = 'bar'
             await self.send_message(message.channel, reply)
+            
+        if message.content.startswith('/kick_dnm_bot'):
+            reply = 'GG'
+            await self.send_message(message.channel, reply)
+            await self.leave_server(message.server)
             
 
 if __name__ == '__main__':
