@@ -260,8 +260,7 @@ class DnmBotClient(discord.Client):
                 except discord.HTTPException:
                     print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
                     pass
-                await self.leave_server(message.server)
-         
+
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
         config = yaml.safe_load(f)
