@@ -6,13 +6,12 @@ import asyncio
 from datetime import datetime, date, time, timedelta
 import pytz
 
-
 class DnmBotClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.RUN_CYCLE = 60 # todo ->60
         self.ALARM_OFFSET = 15 # minutes
-        self.__DISCORD_TOKEN = kwargs['tokens']['discord_bot']
+        # self.__DISCORD_TOKEN = kwargs['tokens']['discord_bot']
         self.events = kwargs['events']
         self.days = kwargs['days']
         
@@ -43,8 +42,6 @@ class DnmBotClient(discord.Client):
         self.events_today = self.days[self.days_replace[weekday]]
         print('events_today updated')
         print(self.events_today)
-        
-        
     
     async def start_bg_tasks(self):
         await self.wait_until_ready()
@@ -68,6 +65,13 @@ class DnmBotClient(discord.Client):
                 try:
                     ch_created = await self.create_channel(server, 'general', type=discord.ChannelType.text)
                 except discord.Forbidden:
+                    print(f'You need to grant permission to create channel on {server.name}')
+                    pass
+                except discord.NotFound:
+                    print(f'Not Found {server.name}')
+                    pass
+                except discord.HTTPException:
+                    print(f'HTTPException {server.name}')
                     pass
                 else:
                     if isinstance(ch_created, discord.channel.Channel):
@@ -79,6 +83,10 @@ class DnmBotClient(discord.Client):
                     ch_created = await self.create_channel(server, 'daily-announcements', type=discord.ChannelType.text)
                 except discord.Forbidden:
                     pass
+                except discord.NotFound:
+                    pass
+                except discord.HTTPException:
+                    pass
                 else:
                     if isinstance(ch_created, discord.channel.Channel):
                         self.daily_channels.append(ch_created)
@@ -88,6 +96,10 @@ class DnmBotClient(discord.Client):
                 try:
                     ch_created = await self.create_channel(server, 'event-alarm', type=discord.ChannelType.text)
                 except discord.Forbidden:
+                    pass
+                except discord.NotFound:
+                    pass
+                except discord.HTTPException:
                     pass
                 else:
                     if isinstance(ch_created, discord.channel.Channel):
@@ -151,7 +163,17 @@ class DnmBotClient(discord.Client):
                     msg = msg + self.events[event]['name'] + '\n'
                 else:
                     msg = msg + dt_event.strftime('%H:%M~') + ' ' + self.events[event]['name'] +'\n'
-            await self.send_message(ch, msg)
+            try:
+                await self.send_message(ch, msg)
+            except discord.Forbidden:
+                print(f'You need to grant permission to send message to {ch.name} on {ch.server.name}')
+                pass
+            except discord.NotFound:
+                print(f'Not Found {ch.server.name}')
+                pass
+            except discord.HTTPException:
+                print(f'HTTPException {ch.server.name}')
+                pass
         
     async def send_event_alarm(self, event_name):
         """
@@ -159,7 +181,18 @@ class DnmBotClient(discord.Client):
         """
         for ch in self.event_channels:
             msg = self.events[event_name]['name'] + ' 開始' + str(self.ALARM_OFFSET) + '分前です\n'
-            await self.send_message(ch, msg)
+            try:
+                await self.send_message(ch, msg)
+            except discord.Forbidden:
+                print(f'You need to grant permission to send message to {ch.name} on {ch.server.name}')
+                pass
+            except discord.NotFound:
+                print(f'Not Found {ch.server.name}')
+                pass
+            except discord.HTTPException:
+                print(f'HTTPException {ch.server.name}')
+                pass
+            
     
     def get_event_datetime(self, event_name):
         tz = pytz.timezone('Asia/Tokyo')
@@ -172,16 +205,45 @@ class DnmBotClient(discord.Client):
         dt_event = tz.localize(dt_event, is_dst=False)
         return dt_event
         
-        
-    
+
     async def on_message(self, message):
         if message.content.startswith('/foo'):
             reply = 'bar'
-            await self.send_message(message.channel, reply)
+            try:
+                await self.send_message(message.channel, reply)
+            except discord.Forbidden:
+                print('You need to grant permission to send message to'
+                      f' {message.channel.name} on {message.channel.server.name}')
+                pass
+            except discord.NotFound:
+                print(f'Not Found {message.channel.name} on {message.channel.server.name}')
+                pass
+            except discord.HTTPException:
+                print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
+                pass
+            
+        if message.content.startswith('/kick_dnm_bot'):
+            reply = 'GG'
+            try:
+                await self.send_message(message.channel, reply)
+            except discord.Forbidden:
+                print('You need to grant permission to send message to'
+                      f' {message.channel.name} on {message.channel.server.name}')
+                pass
+            except discord.NotFound:
+                print(f'Not Found {message.channel.name} on {message.channel.server.name}')
+                pass
+            except discord.HTTPException:
+                print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
+                pass
+            await self.leave_server(message.server)
+            
 
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
         config = yaml.safe_load(f)
     client = DnmBotClient(**config)
-    client.run(config['tokens']['discord_bot'])
+    with open('./tokens.yaml', 'r') as f:
+        token = yaml.safe_load(f) # Use your own bot token.
+    client.run(token['tokens']['discord_bot'])
 
