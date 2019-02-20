@@ -18,6 +18,8 @@ class DnmBotClient(discord.Client):
         self.general_channels = []
         self.daily_channels = []
         self.event_channels = []
+        self.voice_channels = []
+        self.is_someone_in_vc = []
         
         self.events_today = []
         self.daily_announce_time = time(8, 0, 0, 0) # hour, minute, second, microsecond
@@ -55,10 +57,14 @@ class DnmBotClient(discord.Client):
         self.general_channels.clear()
         self.daily_channels.clear()
         self.event_channels.clear()
+        self.voice_channels.clear()
         for server in self.servers:
-            check_general = [ch for ch in server.channels if ch.name == 'general']
-            check_daily = [ch for ch in server.channels if ch.name == 'daily-announcements']
-            check_event = [ch for ch in server.channels if ch.name == 'event-alarm']
+            check_general = [ch for ch in server.channels
+                             if (ch.name == 'general' and ch.type == discord.ChannelType.text)]
+            check_daily = [ch for ch in server.channels
+                           if (ch.name == 'daily-announcements' and ch.type == discord.ChannelType.text)]
+            check_event = [ch for ch in server.channels
+                           if (ch.name == 'event-alarm' and ch.type == discord.ChannelType.text)]
             if len(check_general) != 0:
                 self.general_channels.append(check_general[0])
             else:
@@ -104,18 +110,24 @@ class DnmBotClient(discord.Client):
                 else:
                     if isinstance(ch_created, discord.channel.Channel):
                         self.event_channels.append(ch_created)
+            check_voice = [ch for ch in server.channels if ch.type == discord.ChannelType.voice]
+            self.voice_channels.extend(check_voice)
+            
         print('Found these channels:')
         for ch in self.general_channels:
-            print(f'channel: {ch.name} on server: {ch.server.name}')
+            print(f'text channel: {ch.name} on server: {ch.server.name}')
         for ch in self.daily_channels:
-            print(f'channel: {ch.name} on server: {ch.server.name}')
+            print(f'text channel: {ch.name} on server: {ch.server.name}')
         for ch in self.event_channels:
-            print(f'channel: {ch.name} on server: {ch.server.name}')
+            print(f'text channel: {ch.name} on server: {ch.server.name}')
+        for ch in self.voice_channels:
+            print(f'voice channel: {ch.name} on server: {ch.server.name}')
         print('Updated server and channel info.')
     
     async def bg_loop(self):
         while not self.is_closed:
             await self.update_server_and_channel_info()
+            await self.check_vc_status()
             tz_jpn = pytz.timezone('Asia/Tokyo')
             dt_now = datetime.now(tz_jpn)
             print('###############')
@@ -193,8 +205,7 @@ class DnmBotClient(discord.Client):
                 print(f'HTTPException {ch.server.name}')
                 pass
             
-    
-    def get_event_datetime(self, event_name):
+        def get_event_datetime(self, event_name):
         tz = pytz.timezone('Asia/Tokyo')
         try:
             start_time = self.events[event_name]['time']
@@ -204,7 +215,38 @@ class DnmBotClient(discord.Client):
         dt_event = datetime.combine(date.today(), time(int(start_hour), int(start_minute), 0, 0))
         dt_event = tz.localize(dt_event, is_dst=False)
         return dt_event
-        
+    
+    async def check_vc_status(self):
+        """
+        check status of voice channels and compare current/previous status
+        """
+        vc_status_now = [len(ch.voice_members) != 0 for ch in self.voice_channels]
+        if len(vc_status_now) == len(self.is_someone_in_vc):
+            for now, prev, ch in zip(vc_status_now, self.is_someone_in_vc, self.voice_channels):
+                if now is True and  prev is False:
+                    await self.notify_someone_in_vc(ch)
+
+        self.is_someone_in_vc = vc_status_now
+    
+    async def notify_someone_in_vc(self, ch):
+        """
+        send notification about voice channels
+        """
+        if not isinstance(ch, discord.channel.Channel):
+            raise ValueError
+        msg = str(ch.voice_members).strip('[]') + 'are in ' + ch.name + "\nLet's join and talk!!"
+        try:
+            await self.send_message(ch_general, msg) # todo
+        except discord.Forbidden:
+            print('You need to grant permission to send message to'
+                  f' {message.channel.name} on {message.channel.server.name}')
+            pass
+        except discord.NotFound:
+            print(f'Not Found {message.channel.name} on {message.channel.server.name}')
+            pass
+        except discord.HTTPException:
+            print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
+            pass
 
     async def on_message(self, message):
         if message.content.startswith('/foo'):
