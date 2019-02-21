@@ -9,7 +9,7 @@ import pytz
 class DnmBotClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.RUN_CYCLE = 60 # todo ->60
+        self.RUN_CYCLE = 15
         self.ALARM_OFFSET = 15 # minutes
         # self.__DISCORD_TOKEN = kwargs['tokens']['discord_bot']
         self.events = kwargs['events']
@@ -157,8 +157,6 @@ class DnmBotClient(discord.Client):
                 dif_event = dt_event - dt_now
                 if dif_event < timedelta(seconds=self.RUN_CYCLE) and dif_event >= timedelta():
                     await self.send_event_alarm(event)
-                
-                
             
             # sleep
             await asyncio.sleep(self.RUN_CYCLE)
@@ -205,7 +203,7 @@ class DnmBotClient(discord.Client):
                 print(f'HTTPException {ch.server.name}')
                 pass
             
-        def get_event_datetime(self, event_name):
+    def get_event_datetime(self, event_name):
         tz = pytz.timezone('Asia/Tokyo')
         try:
             start_time = self.events[event_name]['time']
@@ -234,9 +232,19 @@ class DnmBotClient(discord.Client):
         """
         if not isinstance(ch, discord.channel.Channel):
             raise ValueError
-        msg = str(ch.voice_members).strip('[]') + 'are in ' + ch.name + "\nLet's join and talk!!"
+        member_name = []
+        for mem in ch.voice_members:
+            member_name.append(mem.name)
+        msg = str(member_name).strip('[]') + f" さんがボイスチャンネル '{ch.name}' に入りました"
+        ch_general = None
+        for gen in self.general_channels:
+            if gen.server == ch.server:
+                ch_general = gen
+        if ch_general is None:
+            print(f"There is no 'general' server in {ch.server}")
+            return
         try:
-            await self.send_message(ch_general, msg) # todo
+            await self.send_message(ch_general, msg)
         except discord.Forbidden:
             print('You need to grant permission to send message to'
                   f' {message.channel.name} on {message.channel.server.name}')
@@ -280,7 +288,7 @@ class DnmBotClient(discord.Client):
                 pass
             await self.leave_server(message.server)
             
-
+            
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
         config = yaml.safe_load(f)
