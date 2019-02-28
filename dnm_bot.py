@@ -9,7 +9,7 @@ import pytz
 class DnmBotClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.RUN_CYCLE = 15
+        self.RUN_CYCLE = 15 # seconds
         self.ALARM_OFFSET = 15 # minutes
         # self.__DISCORD_TOKEN = kwargs['tokens']['discord_bot']
         self.events = kwargs['events']
@@ -26,7 +26,24 @@ class DnmBotClient(discord.Client):
         
         self.days_replace = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         self.bg_task = self.loop.create_task(self.start_bg_tasks())
+        
     
+    async def _send_message(self, ch, msg):
+        if not isinstance(ch, discord.channel.Channel):
+            raise ValueError
+        try:
+            await self.send_message(ch, msg)
+        except discord.Forbidden:
+            print('You need to grant permission to send message to'
+                  f' {ch.name} on {ch.server.name}')
+            pass
+        except discord.NotFound:
+            print(f'Not Found {ch.name} on {ch.server.name}')
+            pass
+        except discord.HTTPException:
+            print(f'HTTPException {ch.name} on {ch.server.name}')
+            pass
+
     async def on_ready(self):
         print('logged in as')
         print(self.user.name)
@@ -173,35 +190,16 @@ class DnmBotClient(discord.Client):
                     msg = msg + self.events[event]['name'] + '\n'
                 else:
                     msg = msg + dt_event.strftime('%H:%M~') + ' ' + self.events[event]['name'] +'\n'
-            try:
-                await self.send_message(ch, msg)
-            except discord.Forbidden:
-                print(f'You need to grant permission to send message to {ch.name} on {ch.server.name}')
-                pass
-            except discord.NotFound:
-                print(f'Not Found {ch.server.name}')
-                pass
-            except discord.HTTPException:
-                print(f'HTTPException {ch.server.name}')
-                pass
-        
+                    
+            await self._send_message(ch, msg)
+            
     async def send_event_alarm(self, event_name):
         """
         Send event alarm message to the 'event-alarm' channel
         """
         for ch in self.event_channels:
             msg = self.events[event_name]['name'] + ' 開始' + str(self.ALARM_OFFSET) + '分前です\n'
-            try:
-                await self.send_message(ch, msg)
-            except discord.Forbidden:
-                print(f'You need to grant permission to send message to {ch.name} on {ch.server.name}')
-                pass
-            except discord.NotFound:
-                print(f'Not Found {ch.server.name}')
-                pass
-            except discord.HTTPException:
-                print(f'HTTPException {ch.server.name}')
-                pass
+            await self._send_message(ch, msg)
             
     def get_event_datetime(self, event_name):
         tz = pytz.timezone('Asia/Tokyo')
@@ -243,49 +241,16 @@ class DnmBotClient(discord.Client):
         if ch_general is None:
             print(f"There is no 'general' server in {ch.server}")
             return
-        try:
-            await self.send_message(ch_general, msg)
-        except discord.Forbidden:
-            print('You need to grant permission to send message to'
-                  f' {message.channel.name} on {message.channel.server.name}')
-            pass
-        except discord.NotFound:
-            print(f'Not Found {message.channel.name} on {message.channel.server.name}')
-            pass
-        except discord.HTTPException:
-            print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
-            pass
-
+        await self._send_message(ch_general, msg)
+        
     async def on_message(self, message):
         if message.content.startswith('/foo'):
             reply = 'bar'
-            try:
-                await self.send_message(message.channel, reply)
-            except discord.Forbidden:
-                print('You need to grant permission to send message to'
-                      f' {message.channel.name} on {message.channel.server.name}')
-                pass
-            except discord.NotFound:
-                print(f'Not Found {message.channel.name} on {message.channel.server.name}')
-                pass
-            except discord.HTTPException:
-                print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
-                pass
+            await self._send_message(message.channel, reply)
             
         if message.content.startswith('/kick_dnm_bot'):
             reply = 'GG'
-            try:
-                await self.send_message(message.channel, reply)
-            except discord.Forbidden:
-                print('You need to grant permission to send message to'
-                      f' {message.channel.name} on {message.channel.server.name}')
-                pass
-            except discord.NotFound:
-                print(f'Not Found {message.channel.name} on {message.channel.server.name}')
-                pass
-            except discord.HTTPException:
-                print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
-                pass
+            await self._send_message(message.channel, reply)
             await self.leave_server(message.server)
             
             
