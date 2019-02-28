@@ -264,18 +264,7 @@ class DnmBotClient(discord.Client):
         for word in self.conan:
             if message.content.startswith(word):
                 reply = '工藤！'
-                try:
-                    await self.send_message(message.channel, reply)
-                except discord.Forbidden:
-                    print('You need to grant permission to send message to'
-                          f' {message.channel.name} on {message.channel.server.name}')
-                    pass
-                except discord.NotFound:
-                    print(f'Not Found {message.channel.name} on {message.channel.server.name}')
-                    pass
-                except discord.HTTPException:
-                    print(f'HTTPException {message.channel.name} on {message.channel.server.name}')
-                    pass
+                await self._send_message(message.channel, reply)
 
 if __name__ == '__main__':
     with open('./config.yaml', 'r') as f:
