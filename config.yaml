@@ -7,7 +7,7 @@ events:
     time: '19_30'
   territory_war:
     name: '領土争奪戦'
-    time: '20_00'
+    time: '20_30'
   vein_war:
     name: '鉱脈争奪戦'
     time: '21_00'

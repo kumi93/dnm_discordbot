@@ -52,7 +52,7 @@ class DnmBotClient(discord.Client):
         
     async def update_server_and_channel_info(self):
         """
-        get channels[general, daily-announcements, event-alarm] from joined servers, or create channel if not exists.
+        Get channels[general, daily-announcements, event-alarm] from joined servers, or create channel if not exists.
         """
         self.general_channels.clear()
         self.daily_channels.clear()
@@ -163,7 +163,7 @@ class DnmBotClient(discord.Client):
             
     async def send_daily_announcement(self):
         """
-        send daily announcement message to the 'daily-announcements' channel
+        Send daily announcement message to the 'daily-announcements' channel
         """
         for ch in self.daily_channels:
             msg = '今日のイベント：\n'
@@ -187,7 +187,7 @@ class DnmBotClient(discord.Client):
         
     async def send_event_alarm(self, event_name):
         """
-        send event alarm message to the 'event-alarm' channel
+        Send event alarm message to the 'event-alarm' channel
         """
         for ch in self.event_channels:
             msg = self.events[event_name]['name'] + ' 開始' + str(self.ALARM_OFFSET) + '分前です\n'
@@ -216,7 +216,7 @@ class DnmBotClient(discord.Client):
     
     async def check_vc_status(self):
         """
-        check status of voice channels and compare current/previous status
+        Check status of voice channels and compare current/previous status
         """
         vc_status_now = [len(ch.voice_members) != 0 for ch in self.voice_channels]
         if len(vc_status_now) == len(self.is_someone_in_vc):
@@ -228,7 +228,7 @@ class DnmBotClient(discord.Client):
     
     async def notify_someone_in_vc(self, ch):
         """
-        send notification about voice channels
+        Send notification about voice channels
         """
         if not isinstance(ch, discord.channel.Channel):
             raise ValueError
