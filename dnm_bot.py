@@ -43,6 +43,10 @@ class DnmBotClient(discord.Client):
         except discord.HTTPException:
             print(f'HTTPException {ch.name} on {ch.server.name}')
             pass
+        
+    async def send_permission_err_to_general(self, server, msg):
+        # todo
+        pass
 
     async def on_ready(self):
         print('logged in as')
