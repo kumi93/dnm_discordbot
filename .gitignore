@@ -4,6 +4,7 @@
 tokens.yaml
 .idea/
 sandbox/
+.vscode/
 
 ### Python template
 # Byte-compiled / optimized / DLL files
