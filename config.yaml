@@ -19,11 +19,13 @@ events:
   3vs3:
     name: '3:3天空リーグ'
     time: '21_00'
+  world_race:
+    name: 'ワールドレース（12・18・22）'
 days:
-  Mon: ['world_boss']
+  Mon: ['world_race', 'world_boss']
   Tue: ['guild_boss', 'world_boss']
-  Wed: ['vein_war', 'guild_poker', 'world_boss']
+  Wed: ['vein_war', 'guild_poker', 'world_race', 'world_boss']
   Thu: ['guild_boss', 'world_boss']
   Fri: ['crown_poker', 'world_boss']
-  Sat: ['guild_boss', '3vs3', 'world_boss']
+  Sat: ['guild_boss', '3vs3', 'world_race', 'world_boss']
   Sun: ['territory_war', 'guild_poker', 'world_boss']
